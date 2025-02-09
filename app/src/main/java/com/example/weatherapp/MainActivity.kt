@@ -13,9 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.weatherapp.ui.theme.WeatherAppTheme
 
-import io.ktor.client.HttpClient
-import io.ktor.client.request.get
-import io.ktor.client.statement.HttpResponse
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,7 +22,7 @@ class MainActivity : ComponentActivity() {
             WeatherAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
-                        name = getWeatherData().status.toString(),
+                        name = "Hello World",
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -34,18 +31,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-//Http stuff
-suspend fun getWeatherData(): HttpResponse {
-    //Constants
-    val url = "https:www.ktor.io"
-    val key = ""
 
-    val client = HttpClient()
-    //Getting Data
-    val response: HttpResponse = client.get(url)
-
-    return response
-}
 
 
 //Composabls
