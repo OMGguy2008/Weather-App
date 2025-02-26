@@ -13,85 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.weatherapp.ui.theme.WeatherAppTheme
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.request.get
-import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
-
-//Data classes
-//Helper data classes
-//Location data class
-@Serializable
-data class Location(
-    val name: String,
-    val region: String,
-    val country: String,
-    val lat: Double,
-    val lon: Double,
-    val tz_id: String,
-    val localtime_epoch: Int,
-    val localtime: String
-)
-
-//Weather data class
-@Serializable
-data class CurrentWeather(
-    val last_updated_epoch: Long,
-    val last_updated: String,
-    val temp_c: Double,
-    val temp_f: Double,
-    val is_day: Int,
-    val condition: Condition,
-    val wind_mph: Double,
-    val wind_kph: Double,
-    val wind_degree: Int,
-    val wind_dir: String,
-    val pressure_mb: Double,
-    val pressure_in: Double,
-    val precip_mm: Double,
-    val precip_in: Double,
-    val humidity: Int,
-    val cloud: Int,
-    val feelslike_c: Double,
-    val feelslike_f: Double,
-    val windchill_c: Double,
-    val windchill_f: Double,
-    val heatindex_c: Double,
-    val heatindex_f: Double,
-    val dewpoint_c: Double,
-    val dewpoint_f: Double,
-    val vis_km: Double,
-    val vis_miles: Double,
-    val uv: Double,
-    val gust_mph: Double,
-    val gust_kph: Double
-)
-
-//Condition decoration data thing
-@Serializable
-data class Condition(
-    val text: String,
-    val icon: String,
-    val code: Int
-)
-
-
-//Current Weather Class
-@Serializable
-data class weatherData(
-    val location: Location,
-    val current: CurrentWeather
-)
-
-
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -107,13 +30,75 @@ class MainActivity : ComponentActivity() {
                 }
             }
                 runBlocking {
+                    Log.i("Output", "Dabartinių orų duomenys:")
+
+                    //Get Current Weather
                     launch {
-                        val response: HttpResponse? = getData("London")
-                        if (response != null) {
-                            Log.i("response", response.bodyAsText())
-                            //Parsing the Data
-                            val data = Json.decodeFromString<weatherData>(response.bodyAsText())
-                            Log.i("Data output", "Dabartinė temperatūra: " + data.current.feelslike_c.toString() + " C")
+                        val handler = DataHandler()
+                        val data = handler.getCurrentWeatherData("London")
+                        //Lil bit of error handling
+                        if (data != null) {
+
+                            //Spitting out the data
+                            Log.i("Output", "Miestas: " + data.location.name) //Miestas
+                            Log.i("Output", "Laikas: " + data.location.localtime) //Laikas
+
+                            Log.i("Output", "Oro Temperatūra: " + data.current.temp_c + " C" ) //Oro Temperatūrą
+                            Log.i("Output", "Jutiminė temperatūra: " + data.current.feelslike_c + " C") //Jutiminė Temperatūra
+
+                            Log.i("Output", "Orų būsena: " + data.current.condition.text) //Orų būsena
+
+                            Log.i("Output", "Vėjo kryptis: " + data.current.wind_dir) //Vėjo kryptis
+                            Log.i("Output", "Vėjo greitis: " + data.current.wind_kph + "km/h") //Vėjo greitis
+
+                            Log.i("Output", "Vėjo gūsiai: " + data.current.gust_kph + "km/h") //Vėjo gūsiai
+
+                            Log.i("Output", "Oro Drėgnumas: " + data.current.humidity + "%") //Oro Drėgnumas
+
+                            Log.i("Output", "Matomumas: " + data.current.vis_km + "km") //Matomumas
+
+                            Log.i("Output", "Ultravioletinės Spinduliuotės Lygis: " + data.current.uv) //Ultravioletinės Spinduliuotės Lygis
+
+                            Log.i("Output", "-----------------------------------------------------------------------------------------")
+
+                            Log.i("Output", "Ateities orų duomenys:")
+                        } else{
+                            Log.e("Error", "Failed to request data")
+                            return@launch
+                        }
+                    }
+
+
+                    //Get weather forecast
+                    launch{
+                        //Sending the request and getting the data
+                        val handler = DataHandler()
+                        val data: DataHandler.WeatherForecastData? = handler.getForecast(3, "London")
+
+                        //Lil bit of error handling
+                        if (data != null) {
+                            Log.i("Output", "Miestas: " + data.location.name) // Miestas
+
+                            for (day in data.forecast.forecastday){
+                                Log.i("Output", "Diena: " + day.date) //Data
+
+                                Log.i("Output", "Didžiausia Temperatūra: " + day.day.maxtemp_c + " C") // Max Temp
+                                Log.i("Output", "Vidutinė Temperatūra: " + day.day.avgtemp_c + " C") // Vid Temp
+
+                                Log.i("Output", "Didžiausias vėjo greitis" + day.day.maxwind_kph + " km/h") // Max Vėjas
+
+                                Log.i("Output", "Vidutinis Matomumas: " + day.day.avgvis_km + " km") // Vidutinis matomumas
+
+                                Log.i("Output", "Oro būsena: " + day.day.condition.text) // Oro būsena
+
+                                Log.i("Output", "Vidutinis drėgnumas: " + day.day.avghumidity + "%") // Oro būsena
+
+                                Log.i("Output", "Ultravioletinės spinduliuotės lygis: " + day.day.uv) //Ultravioletinės spinduliuotės lygis
+
+                                Log.i("Output", "--------------------------------------------------------------------------------------")
+
+                            }
+
                         } else{
                             Log.e("Error", "Failed to request data")
                             return@launch
@@ -124,34 +109,6 @@ class MainActivity : ComponentActivity() {
 
         }
     }
-
-
-//Data
-suspend fun getData(city: String): HttpResponse? {
-    val client = HttpClient()
-    try {
-        //Variables
-        val url = "http://api.weatherapi.com/v1/current.json"
-        val key = "95e088be19344374a8d174802242903"
-        //Networking code
-
-        val response: HttpResponse = client.get(url) {
-            url {
-                parameters.append("key", key)
-                parameters.append("q", city)
-            }
-        }
-        Log.i("Data", response.status.toString())
-        return response
-    } catch(e: Exception){
-        e.printStackTrace()
-        return null
-    } finally {
-        client.close()
-    }
-}
-
-
 
 
 //Composables
