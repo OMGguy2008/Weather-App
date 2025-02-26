@@ -9,7 +9,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 class DataHandler {
-
 //Data Classes
 
     //For realtime data
