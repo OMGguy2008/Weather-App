@@ -5,17 +5,35 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.example.weatherapp.ui.theme.WeatherAppTheme
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,6 +46,8 @@ class MainActivity : ComponentActivity() {
                         name = "World",
                         modifier = Modifier.padding(innerPadding)
                     )
+
+                    mainScreen()
                 }
             }
                 runBlocking {
@@ -36,7 +56,7 @@ class MainActivity : ComponentActivity() {
                     //Get Current Weather
                     launch {
                         val handler = DataHandler()
-                        val data = handler.getCurrentWeatherData("London")
+                        val data = handler.getCurrentWeatherData("Kaunas")
                         //Lil bit of error handling
                         if (data != null) {
 
@@ -128,3 +148,61 @@ fun GreetingPreview() {
         Greeting("Android")
     }
 }
+
+
+// UI
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun mainScreen(){
+    //Background Image
+    val backgroundImage = painterResource(R.drawable.cloud_texture)
+    Image(
+        painter = backgroundImage,
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier.fillMaxSize()
+
+    )
+    //Background
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+
+    ){
+        //Search bar
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .padding(32.dp),
+
+
+            verticalAlignment = Alignment.CenterVertically
+
+        ){
+            var text = remember { mutableStateOf("") }
+
+            TextField(
+                value = text.value,
+                onValueChange = {text.value = it},
+                placeholder = {Text("Search For A Location")},
+                singleLine = true,
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color(236,230,240)
+                ),
+
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+
+            )
+
+        }
+    }
+
+}
+
+
+
+

@@ -226,7 +226,7 @@ class DataHandler {
                 }
             }
             Log.i("Data", response.status.toString())
-
+            Log.i("Test", response.bodyAsText())
             //Parsing Json
             val data = Json.decodeFromString<currentWeatherData>(response.bodyAsText())
             return data

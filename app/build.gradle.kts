@@ -48,7 +48,7 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktor_version")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
-
+    implementation("androidx.compose.material:material:1.5.4")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
