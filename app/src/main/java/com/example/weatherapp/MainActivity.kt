@@ -7,11 +7,17 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -22,15 +28,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.weatherapp.ui.theme.WeatherAppTheme
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -61,6 +74,7 @@ class MainActivity : ComponentActivity() {
                         if (data != null) {
 
                             //Spitting out the data
+                            /*
                             Log.i("Output", "Miestas: " + data.location.name) //Miestas
                             Log.i("Output", "Laikas: " + data.location.localtime) //Laikas
 
@@ -83,6 +97,8 @@ class MainActivity : ComponentActivity() {
                             Log.i("Output", "-----------------------------------------------------------------------------------------")
 
                             Log.i("Output", "Ateities orų duomenys:")
+                            */
+
                         } else{
                             Log.e("Error", "Failed to request data")
                             return@launch
@@ -155,6 +171,7 @@ fun GreetingPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun mainScreen(){
+
     //Background Image
     val backgroundImage = painterResource(R.drawable.cloud_texture)
     Image(
@@ -199,9 +216,99 @@ fun mainScreen(){
             )
 
         }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        //Current Status
+        Column(modifier = Modifier
+            .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ){
+                //Location Text
+                Text(modifier = Modifier
+                    .fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    text = "Kaunas",
+                    fontSize = 40.sp,
+                    fontWeight = FontWeight.Thin
+
+                )
+
+                //Temperature Text
+                Text(modifier = Modifier
+                    .fillMaxWidth(),
+                    text = "14°C",
+                    textAlign = TextAlign.Center,
+                    fontSize = 60.sp,
+                    fontWeight = FontWeight.ExtraLight
+                )
+
+                //Condition Text
+                Text(modifier = Modifier
+                    .fillMaxWidth(),
+                    text = "Sunny",
+                    textAlign = TextAlign.Center,
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.Thin
+                )
+
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            //Current Forecast
+            Column(modifier = Modifier
+                .fillMaxWidth()
+                .background(Brush.horizontalGradient(colors = listOf(
+                    Color(105,141,244),
+                    Color(86,152,240)
+                ))),
+
+            ) {
+
+                Text(modifier = Modifier,
+                    text = "Hourly Forecast",
+                    fontSize = 20.sp,
+                    )
+
+                Spacer(modifier = Modifier.height(10.dp).border(1.dp,Color.DarkGray, RectangleShape))
+
+                Row(
+                    modifier = Modifier
+                        .horizontalScroll(rememberScrollState()),
+                ){
+                    HourlyForecastItem("Now", R.drawable.ic_sunny,14)
+                    HourlyForecastItem("13:00", R.drawable.ic_sunny, 20)
+                }
+
+            }
+        }
     }
 
+@Composable
+fun HourlyForecastItem(time:String, icon:Int , temp:Int){
+    Column(
+        modifier = Modifier
+            .padding(8.dp)
+            .border(1.dp, Color.DarkGray),
+    ){
+        //Time Text
+        Text(text = time, fontWeight = FontWeight.Bold, fontSize = 16.sp, textAlign = TextAlign.Center)
+
+        //Icon
+        Image(
+            modifier = Modifier
+                .size(24.dp),
+            alignment = Alignment.Center,
+            painter = painterResource(icon),
+            contentDescription = "Icon",
+
+        )
+
+        //Temp Text
+        Text(text = "$temp °C", fontWeight = FontWeight.Bold, fontSize = 16.sp, textAlign = TextAlign.Center)
+    }
 }
+
 
 
 
