@@ -10,7 +10,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -23,35 +22,32 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.weatherapp.ui.theme.WeatherAppTheme
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,7 +61,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     )
 
-                    mainScreen()
+                    mainScreen(WeatherViewModel())
                 }
             }
                 runBlocking {
@@ -175,155 +171,168 @@ fun GreetingPreview() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun mainScreen(){
-
-    //Background Image
-    val backgroundImage = painterResource(R.drawable.cloud_texture)
-    Image(
-        painter = backgroundImage,
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier.fillMaxSize()
-
-    )
-    //Background
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-
-    ){
-        //Search bar
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .padding(32.dp),
-
-
-            verticalAlignment = Alignment.CenterVertically
-
-        ){
-            var text = remember { mutableStateOf("") }
-
-            TextField(
-                value = text.value,
-                onValueChange = {text.value = it},
-                placeholder = {Text("Search For A Location")},
-                singleLine = true,
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color(236,230,240)
-                ),
-
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
+fun mainScreen(viewModel: WeatherViewModel){
+    when(viewModel.weatherState){
+        is State.Loading -> {
+            CircularProgressIndicator()
+        }
+        is State.Success -> {
+            val data = (viewModel.weatherState as State.Success).data
+            //Background Image
+            val backgroundImage = painterResource(R.drawable.cloud_texture)
+            Image(
+                painter = backgroundImage,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
 
             )
+            //Background
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
 
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-
-        //Current Status
-        Column(modifier = Modifier
-            .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ){
-                //Location Text
-                Text(modifier = Modifier
-                    .fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    text = "Kaunas",
-                    fontSize = 40.sp,
-                    fontWeight = FontWeight.Thin
-
-                )
-
-                //Temperature Text
-                Text(modifier = Modifier
-                    .fillMaxWidth(),
-                    text = "14°C",
-                    textAlign = TextAlign.Center,
-                    fontSize = 60.sp,
-                    fontWeight = FontWeight.ExtraLight
-                )
-
-                //Condition Text
-                Text(modifier = Modifier
-                    .fillMaxWidth(),
-                    text = "Sunny",
-                    textAlign = TextAlign.Center,
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Thin
-                )
-
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            //Hourly forecast
-            Column(modifier = Modifier
-                .fillMaxWidth()
-                .background(Brush.horizontalGradient(colors = listOf(
-                    Color(105,141,244),
-                    Color(86,152,240)
-                ))),
-
-            ) {
-
-                Text(modifier = Modifier.padding(horizontal = 8.dp),
-                    text = "Hourly Forecast",
-                    fontSize = 20.sp,
-                    )
-
-                Spacer(modifier = Modifier.height(10.dp).border(1.dp,Color.DarkGray, RectangleShape))
-
+            ){
+                //Search bar
                 Row(
                     modifier = Modifier
-                        .horizontalScroll(rememberScrollState()),
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .padding(32.dp),
+
+
+                    verticalAlignment = Alignment.CenterVertically
+
                 ){
-                    HourlyForecastItem("Now", R.drawable.ic_sunny,14)
-                    HourlyForecastItem("13:00", R.drawable.ic_sunny, 21)
-                    HourlyForecastItem("14:00", R.drawable.ic_sunny, 19)
-                    HourlyForecastItem("15:00", R.drawable.ic_sunny, 20)
-                    HourlyForecastItem("16:00", R.drawable.ic_sunny, 24)
-                    HourlyForecastItem("17:00", R.drawable.ic_sunny, 16)
-                    HourlyForecastItem("18:00", R.drawable.ic_sunny, 30)
-                    HourlyForecastItem("19:00", R.drawable.ic_sunny, 32)
-                    HourlyForecastItem("20:00", R.drawable.ic_sunny, 24)
-                    HourlyForecastItem("21:00", R.drawable.ic_sunny, 25)
-                    HourlyForecastItem("22:00", R.drawable.ic_sunny, 21)
-                    HourlyForecastItem("23:00", R.drawable.ic_sunny, 15)
+                    var text = remember { mutableStateOf("") }
+
+                    TextField(
+                        value = text.value,
+                        onValueChange = {text.value = it},
+                        placeholder = {Text("Search For A Location")},
+                        singleLine = true,
+                        colors = TextFieldDefaults.textFieldColors(
+                            containerColor = Color(236,230,240)
+                        ),
+
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+
+                    )
+
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+
+                //Current Status
+                Column(modifier = Modifier
+                    .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    //Location Text
+                    Text(modifier = Modifier
+                        .fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        text = data!!.location.name,
+                        fontSize = 40.sp,
+                        fontWeight = FontWeight.Thin
+
+                    )
+
+                    //Temperature Text
+                    Text(modifier = Modifier
+                        .fillMaxWidth(),
+                        text = data.current.temp_c.roundToInt().toString() + "°C",
+                        textAlign = TextAlign.Center,
+                        fontSize = 60.sp,
+                        fontWeight = FontWeight.ExtraLight
+                    )
+
+                    //Condition Text
+                    Text(modifier = Modifier
+                        .fillMaxWidth(),
+                        text = data.current.condition.text,
+                        textAlign = TextAlign.Center,
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Thin
+                    )
+
                 }
 
-            }
-        Spacer(modifier = Modifier.height(30.dp))
-            //Daily Forecast
-            Column(modifier = Modifier
-                .fillMaxWidth()
-                .background(Brush.horizontalGradient(colors = listOf(
-                    Color(105,141,244),
-                    Color(86,152,240)
-                )))
-            ){
-                Text(
-                    text = "Daily Forecast",
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                //Hourly forecast
                 Column(modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                ) {
-                    DailyForecastItem("Today", R.drawable.ic_sunny,R.drawable.ic_sunny,32, 16, 30)
-                    DailyForecastItem("Tomorrow", R.drawable.ic_sunny,R.drawable.ic_sunny,22, 10, 83)
-                    DailyForecastItem("Wednesday", R.drawable.ic_sunny,R.drawable.ic_sunny,19, 16, 98)
-                    DailyForecastItem("Thursday", R.drawable.ic_sunny,R.drawable.ic_sunny,25, 21, 55)
-                    DailyForecastItem("Friday", R.drawable.ic_sunny,R.drawable.ic_sunny,25, 21, 55)
-                    DailyForecastItem("Saturday", R.drawable.ic_sunny,R.drawable.ic_sunny,25, 21, 55)
-                    DailyForecastItem("Sunday", R.drawable.ic_sunny,R.drawable.ic_sunny,25, 21, 55)
+                    .fillMaxWidth()
+                    .background(Brush.horizontalGradient(colors = listOf(
+                        Color(105,141,244),
+                        Color(86,152,240)
+                    ))),
+
+                    ) {
+
+                    Text(modifier = Modifier.padding(horizontal = 8.dp),
+                        text = "Hourly Forecast",
+                        fontSize = 20.sp,
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp).border(1.dp,Color.DarkGray, RectangleShape))
+
+                    Row(
+                        modifier = Modifier
+                            .horizontalScroll(rememberScrollState()),
+                    ){
+                        HourlyForecastItem("Now", R.drawable.ic_sunny,14)
+                        HourlyForecastItem("13:00", R.drawable.ic_sunny, 21)
+                        HourlyForecastItem("14:00", R.drawable.ic_sunny, 19)
+                        HourlyForecastItem("15:00", R.drawable.ic_sunny, 20)
+                        HourlyForecastItem("16:00", R.drawable.ic_sunny, 24)
+                        HourlyForecastItem("17:00", R.drawable.ic_sunny, 16)
+                        HourlyForecastItem("18:00", R.drawable.ic_sunny, 30)
+                        HourlyForecastItem("19:00", R.drawable.ic_sunny, 32)
+                        HourlyForecastItem("20:00", R.drawable.ic_sunny, 24)
+                        HourlyForecastItem("21:00", R.drawable.ic_sunny, 25)
+                        HourlyForecastItem("22:00", R.drawable.ic_sunny, 21)
+                        HourlyForecastItem("23:00", R.drawable.ic_sunny, 15)
+                    }
+
+                }
+                Spacer(modifier = Modifier.height(30.dp))
+                //Daily Forecast
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Brush.horizontalGradient(colors = listOf(
+                        Color(105,141,244),
+                        Color(86,152,240)
+                    )))
+                ){
+                    Text(
+                        text = "Daily Forecast",
+                        fontSize = 20.sp,
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                    )
+                    Column(modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                    ) {
+                        DailyForecastItem("Today", R.drawable.ic_sunny,R.drawable.ic_sunny,32, 16, 30)
+                        DailyForecastItem("Tomorrow", R.drawable.ic_sunny,R.drawable.ic_sunny,22, 10, 83)
+                        DailyForecastItem("Wednesday", R.drawable.ic_sunny,R.drawable.ic_sunny,19, 16, 98)
+                        DailyForecastItem("Thursday", R.drawable.ic_sunny,R.drawable.ic_sunny,25, 21, 55)
+                        DailyForecastItem("Friday", R.drawable.ic_sunny,R.drawable.ic_sunny,25, 21, 55)
+                        DailyForecastItem("Saturday", R.drawable.ic_sunny,R.drawable.ic_sunny,25, 21, 55)
+                        DailyForecastItem("Sunday", R.drawable.ic_sunny,R.drawable.ic_sunny,25, 21, 55)
+                    }
                 }
             }
         }
+
+        is State.Error -> {
+            Text(text = "Error: ${(viewModel.weatherState as State.Error).errorMsg}")
+        }
+
     }
+
+}
 
 @Composable
 fun HourlyForecastItem(time:String, icon:Int , temp:Int){
