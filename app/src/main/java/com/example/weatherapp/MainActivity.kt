@@ -10,15 +10,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -41,6 +45,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -255,7 +260,7 @@ fun mainScreen(){
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            //Current Forecast
+            //Hourly forecast
             Column(modifier = Modifier
                 .fillMaxWidth()
                 .background(Brush.horizontalGradient(colors = listOf(
@@ -265,7 +270,7 @@ fun mainScreen(){
 
             ) {
 
-                Text(modifier = Modifier,
+                Text(modifier = Modifier.padding(horizontal = 8.dp),
                     text = "Hourly Forecast",
                     fontSize = 20.sp,
                     )
@@ -277,9 +282,45 @@ fun mainScreen(){
                         .horizontalScroll(rememberScrollState()),
                 ){
                     HourlyForecastItem("Now", R.drawable.ic_sunny,14)
-                    HourlyForecastItem("13:00", R.drawable.ic_sunny, 20)
+                    HourlyForecastItem("13:00", R.drawable.ic_sunny, 21)
+                    HourlyForecastItem("14:00", R.drawable.ic_sunny, 19)
+                    HourlyForecastItem("15:00", R.drawable.ic_sunny, 20)
+                    HourlyForecastItem("16:00", R.drawable.ic_sunny, 24)
+                    HourlyForecastItem("17:00", R.drawable.ic_sunny, 16)
+                    HourlyForecastItem("18:00", R.drawable.ic_sunny, 30)
+                    HourlyForecastItem("19:00", R.drawable.ic_sunny, 32)
+                    HourlyForecastItem("20:00", R.drawable.ic_sunny, 24)
+                    HourlyForecastItem("21:00", R.drawable.ic_sunny, 25)
+                    HourlyForecastItem("22:00", R.drawable.ic_sunny, 21)
+                    HourlyForecastItem("23:00", R.drawable.ic_sunny, 15)
                 }
 
+            }
+        Spacer(modifier = Modifier.height(30.dp))
+            //Daily Forecast
+            Column(modifier = Modifier
+                .fillMaxWidth()
+                .background(Brush.horizontalGradient(colors = listOf(
+                    Color(105,141,244),
+                    Color(86,152,240)
+                )))
+            ){
+                Text(
+                    text = "Daily Forecast",
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                )
+                Column(modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                ) {
+                    DailyForecastItem("Today", R.drawable.ic_sunny,R.drawable.ic_sunny,32, 16, 30)
+                    DailyForecastItem("Tomorrow", R.drawable.ic_sunny,R.drawable.ic_sunny,22, 10, 83)
+                    DailyForecastItem("Wednesday", R.drawable.ic_sunny,R.drawable.ic_sunny,19, 16, 98)
+                    DailyForecastItem("Thursday", R.drawable.ic_sunny,R.drawable.ic_sunny,25, 21, 55)
+                    DailyForecastItem("Friday", R.drawable.ic_sunny,R.drawable.ic_sunny,25, 21, 55)
+                    DailyForecastItem("Saturday", R.drawable.ic_sunny,R.drawable.ic_sunny,25, 21, 55)
+                    DailyForecastItem("Sunday", R.drawable.ic_sunny,R.drawable.ic_sunny,25, 21, 55)
+                }
             }
         }
     }
@@ -289,7 +330,7 @@ fun HourlyForecastItem(time:String, icon:Int , temp:Int){
     Column(
         modifier = Modifier
             .padding(8.dp)
-            .border(1.dp, Color.DarkGray),
+            .border(1.dp, Color.LightGray),
     ){
         //Time Text
         Text(text = time, fontWeight = FontWeight.Bold, fontSize = 16.sp, textAlign = TextAlign.Center)
@@ -300,13 +341,90 @@ fun HourlyForecastItem(time:String, icon:Int , temp:Int){
                 .size(24.dp),
             alignment = Alignment.Center,
             painter = painterResource(icon),
-            contentDescription = "Icon",
+            contentDescription = null
 
         )
 
         //Temp Text
         Text(text = "$temp °C", fontWeight = FontWeight.Bold, fontSize = 16.sp, textAlign = TextAlign.Center)
     }
+}
+
+@Composable
+fun DailyForecastItem(day:String, dayIcon: Int, nightIcon:Int,  maxTemp: Int, minTemp:Int, precipitation: Int){
+    Row(modifier = Modifier
+            .padding(8.dp)
+            .border(1.dp, Color.LightGray),
+        ){
+        //Day
+        Text(modifier = Modifier
+            .width(120.dp),
+            text = day,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Left
+        )
+
+        Spacer(modifier = Modifier.width(30.dp))
+
+        //Precipitation
+        Column(
+            modifier = Modifier.fillMaxHeight()
+        ){
+            //Rain Drop Icon
+            Image(painter = painterResource(R.drawable.ic_rain), contentDescription = null, modifier = Modifier.size(24.dp))
+            //Number
+            Text(modifier = Modifier,
+                text = precipitation.toString() + "%",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center
+            )
+        }
+
+
+        Spacer(modifier = Modifier.width(30.dp))
+
+        //Day Icon
+        Image(
+            modifier = Modifier
+                .size(24.dp),
+            alignment = Alignment.Center,
+            painter = painterResource(dayIcon),
+            contentDescription = null
+        )
+        Spacer(modifier = Modifier.width(5.dp))
+
+        //Max Temp
+        Text(modifier = Modifier,
+            text = maxTemp.toString() + "°C",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Left
+        )
+
+        Spacer(modifier = Modifier.width(20.dp))
+
+        //Night Icon
+        Image(
+            modifier = Modifier
+                .size(24.dp),
+            alignment = Alignment.Center,
+            painter = painterResource(nightIcon),
+            contentDescription = null
+        )
+
+        Spacer(modifier = Modifier.width(5.dp))
+
+        //Min Temp
+        Text(modifier = Modifier,
+            text = minTemp.toString() + "°C",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Left
+        )
+    }
+
 }
 
 
