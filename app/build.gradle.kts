@@ -67,4 +67,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     //Image Loading
     implementation("io.coil-kt:coil-compose:2.5.0")
+    //Getting location
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
 }

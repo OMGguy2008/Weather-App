@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,12 +38,16 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.weatherapp.ui.theme.WeatherAppTheme
 import kotlin.math.roundToInt
 
@@ -65,12 +71,13 @@ class MainActivity : ComponentActivity() {
 fun mainScreen(viewModel: WeatherViewModel){
     when(viewModel.weatherState){
         is State.Loading -> {
-            CircularProgressIndicator()
+            CircularProgressIndicator(modifier = Modifier.fillMaxSize())
         }
         is State.Success -> {
             val data = (viewModel.weatherState as State.Success).data
             //Background Image
             val backgroundImage = painterResource(R.drawable.cloud_texture)
+
             Image(
                 painter = backgroundImage,
                 contentDescription = null,
@@ -84,6 +91,7 @@ fun mainScreen(viewModel: WeatherViewModel){
                     .fillMaxSize()
 
             ){
+                Spacer(modifier = Modifier.height(8.dp))
                 //Search bar
                 Row(
                     modifier = Modifier
@@ -98,18 +106,21 @@ fun mainScreen(viewModel: WeatherViewModel){
                     var text = remember { mutableStateOf("") }
 
                     TextField(
-                        value = text.value,
-                        onValueChange = {text.value = it},
-                        placeholder = {Text("Search For A Location")},
+                        value = viewModel.query,
+                        onValueChange = { viewModel.query = it },
+                        placeholder = { Text("Search For A Location", color = Color.Gray) },
                         singleLine = true,
                         colors = TextFieldDefaults.textFieldColors(
-                            containerColor = Color(236,230,240)
+                            containerColor = Color(210, 210, 210, 255),
+                            focusedTextColor = Color(44, 44, 44, 255),
+                            focusedIndicatorColor = Color.DarkGray,
+                            cursorColor = Color.DarkGray,
                         ),
-
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-
+                            .clip(RoundedCornerShape(16.dp)),
+                        keyboardActions = KeyboardActions(onSearch = { viewModel.searchWeatherData() }),
+                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search)
                     )
 
                 }
@@ -156,6 +167,8 @@ fun mainScreen(viewModel: WeatherViewModel){
 
                 Spacer(modifier = Modifier.height(12.dp))
 
+
+
                 //Hourly forecast
                 Column(modifier = Modifier
                     .fillMaxWidth()
@@ -179,10 +192,10 @@ fun mainScreen(viewModel: WeatherViewModel){
                             .horizontalScroll(rememberScrollState()),
                     ){
                         for (hour in data!!.forecast.forecastday[0].hour){
-                            if(hour == data.forecast.forecastday[0].hour[0]){
-                                HourlyForecastItem("Now", hour.condition.icon, hour.temp_c.roundToInt())
-                                continue
-                            }
+//                            if(hour == data.forecast.forecastday[0].hour[0]){
+//                                HourlyForecastItem("Now", hour.condition.icon, hour.temp_c.roundToInt())
+//                                continue
+//                            }
                             HourlyForecastItem(hour.time, hour.condition.icon, hour.temp_c.roundToInt())
                         }
 
@@ -190,6 +203,8 @@ fun mainScreen(viewModel: WeatherViewModel){
 
                 }
                 Spacer(modifier = Modifier.height(30.dp))
+
+
                 //Daily Forecast
                 Column(modifier = Modifier
                     .fillMaxWidth()
@@ -225,7 +240,7 @@ fun mainScreen(viewModel: WeatherViewModel){
                 }
             }
         }
-
+        //TODO: Fix the absolute shit of my error handling
         is State.Error -> {
             Text(text = "Error: ${(viewModel.weatherState as State.Error).errorMsg}")
         }
@@ -242,13 +257,19 @@ fun HourlyForecastItem(time:String, icon:String, temp: Int){
             .border(1.dp, Color.LightGray),
     ){
         //Time Text
-        Text(text = time, fontWeight = FontWeight.Bold, fontSize = 16.sp, textAlign = TextAlign.Center, color = Color.White)
+        Text(
+            text = if(time == "Now"){"Now"} else {time.substring(startIndex = 10)},
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp,
+            textAlign = TextAlign.Center,
+            color = Color.White
+        )
 
         //Icon
         AsyncImage(
-            model = icon,
+            model = ImageRequest.Builder(context = LocalContext.current).data("https:${icon}").crossfade(false).build(),
             modifier = Modifier
-            .size(24.dp),
+            .size(50.dp),
             alignment = Alignment.Center,
             contentDescription = null
         )
@@ -267,7 +288,7 @@ fun DailyForecastItem(day:String, dayIcon: String, nightIcon: String, maxTemp: I
         //Day
         Text(modifier = Modifier
             .width(120.dp),
-            text = day,
+            text = if(day == "Today"){"Today"} else if(day == "Tomorrow"){"Tomorrow"} else{day.substring(startIndex = 5)},
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Left,
@@ -275,14 +296,14 @@ fun DailyForecastItem(day:String, dayIcon: String, nightIcon: String, maxTemp: I
 
         )
 
-        Spacer(modifier = Modifier.width(30.dp))
+        Spacer(modifier = Modifier.width(15.dp))
 
         //Precipitation
         Column(
             modifier = Modifier.fillMaxHeight()
         ){
             //Rain Drop Icon
-            Image(painter = painterResource(R.drawable.ic_rain), contentDescription = null, modifier = Modifier.size(24.dp))
+            Image(painter = painterResource(R.drawable.ic_raindrop), contentDescription = null, modifier = Modifier.size(24.dp))
             //Number
             Text(modifier = Modifier,
                 text = precipitation.toString() + "%",
@@ -298,10 +319,10 @@ fun DailyForecastItem(day:String, dayIcon: String, nightIcon: String, maxTemp: I
 
         //Day Icon
         AsyncImage(
+            model = ImageRequest.Builder(context = LocalContext.current).data("https:${dayIcon}").crossfade(false).build(),
             modifier = Modifier
-                .size(24.dp),
+                .size(40.dp),
             alignment = Alignment.Center,
-            model = dayIcon,
             contentDescription = null
         )
         Spacer(modifier = Modifier.width(5.dp))
@@ -320,9 +341,9 @@ fun DailyForecastItem(day:String, dayIcon: String, nightIcon: String, maxTemp: I
         //Night Icon
         AsyncImage(
             modifier = Modifier
-                .size(24.dp),
+                .size(40.dp),
             alignment = Alignment.Center,
-            model = nightIcon,
+            model = ImageRequest.Builder(context = LocalContext.current).data("https:${nightIcon}").crossfade(false).build(),
             contentDescription = null
         )
 
@@ -339,6 +360,8 @@ fun DailyForecastItem(day:String, dayIcon: String, nightIcon: String, maxTemp: I
     }
 
 }
+
+
 
 
 

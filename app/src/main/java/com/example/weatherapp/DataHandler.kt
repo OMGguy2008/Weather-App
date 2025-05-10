@@ -252,7 +252,11 @@ class DataHandler {
                 url{
                     //Modifiable Data
                     parameters.append("key", key)
+
+                    //Location Param
                     parameters.append("q", city)
+
+
                     parameters.append("days", days.toString())
 
                     //Constant Data
