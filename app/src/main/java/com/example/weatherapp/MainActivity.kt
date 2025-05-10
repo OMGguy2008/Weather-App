@@ -40,7 +40,6 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -60,7 +59,6 @@ class MainActivity : ComponentActivity() {
                 mainScreen(WeatherViewModel())
             }
         }
-
     }
 }
 //Composables
@@ -98,8 +96,6 @@ fun mainScreen(viewModel: WeatherViewModel){
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
                         .padding(32.dp),
-
-
                     verticalAlignment = Alignment.CenterVertically
 
                 ){
@@ -192,10 +188,6 @@ fun mainScreen(viewModel: WeatherViewModel){
                             .horizontalScroll(rememberScrollState()),
                     ){
                         for (hour in data!!.forecast.forecastday[0].hour){
-//                            if(hour == data.forecast.forecastday[0].hour[0]){
-//                                HourlyForecastItem("Now", hour.condition.icon, hour.temp_c.roundToInt())
-//                                continue
-//                            }
                             HourlyForecastItem(hour.time, hour.condition.icon, hour.temp_c.roundToInt())
                         }
 
@@ -203,7 +195,6 @@ fun mainScreen(viewModel: WeatherViewModel){
 
                 }
                 Spacer(modifier = Modifier.height(30.dp))
-
 
                 //Daily Forecast
                 Column(modifier = Modifier
@@ -233,20 +224,17 @@ fun mainScreen(viewModel: WeatherViewModel){
                                 continue
                             }
                             DailyForecastItem(day.date, day.day.condition.icon,day.day.condition.icon, day.day.maxtemp_c.roundToInt(), day.day.mintemp_c.roundToInt(), day.day.daily_chance_of_rain)
-
                         }
 
                     }
                 }
             }
         }
-        //TODO: Fix the absolute shit of my error handling
+        //TODO: Fix the absolute shit that is my error handling or lack thereof
         is State.Error -> {
             Text(text = "Error: ${(viewModel.weatherState as State.Error).errorMsg}")
         }
-
     }
-
 }
 
 @Composable
@@ -264,7 +252,6 @@ fun HourlyForecastItem(time:String, icon:String, temp: Int){
             textAlign = TextAlign.Center,
             color = Color.White
         )
-
         //Icon
         AsyncImage(
             model = ImageRequest.Builder(context = LocalContext.current).data("https:${icon}").crossfade(false).build(),
@@ -273,7 +260,6 @@ fun HourlyForecastItem(time:String, icon:String, temp: Int){
             alignment = Alignment.Center,
             contentDescription = null
         )
-
         //Temp Text
         Text(text = "$temp °C", fontWeight = FontWeight.Bold, fontSize = 16.sp, textAlign = TextAlign.Center, color = Color.White)
     }

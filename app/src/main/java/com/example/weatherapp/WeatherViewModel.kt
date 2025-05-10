@@ -1,7 +1,6 @@
 package com.example.weatherapp
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
@@ -49,8 +48,6 @@ class WeatherViewModel: ViewModel() {
                 weatherState = State.Error("Failed to get data. Check logs for more info")
                 e.printStackTrace()
             }
-
-
         }
     }
 }

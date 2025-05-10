@@ -206,9 +206,6 @@ class DataHandler {
         val uv: Double
     )
 
-
-
-
     //Functions
     //Current Weather Data Getter
     suspend fun getCurrentWeatherData(city: String): currentWeatherData? {
