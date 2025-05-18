@@ -4,10 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,11 +20,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -67,6 +73,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun mainScreen(viewModel: WeatherViewModel){
+    viewModel.searchWeatherData("Kaunas")
     when(viewModel.weatherState){
         is State.Loading -> {
             CircularProgressIndicator(modifier = Modifier.fillMaxSize())
@@ -230,12 +237,52 @@ fun mainScreen(viewModel: WeatherViewModel){
                 }
             }
         }
-        //TODO: Fix the absolute shit that is my error handling or lack thereof
+
         is State.Error -> {
-            Text(text = "Error: ${(viewModel.weatherState as State.Error).errorMsg}")
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .background(Brush.horizontalGradient(colors = listOf(Color(105,141,244), Color(86,152,240)))),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 150.dp)
+                ){
+                    Text(text = "Error: ${(viewModel.weatherState as State.Error).errorMsg}",
+                        modifier = Modifier.padding(16.dp),
+                        textAlign = TextAlign.Center,
+                        fontSize = 30.sp,
+                        color = Color.White,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(1.dp))
+
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
+                    Button(
+                        onClick = {viewModel.searchWeatherData("Kaunas")},
+                        modifier = Modifier.size(200.dp).wrapContentSize(),
+                        shape = RectangleShape,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray, contentColor = Color.DarkGray),
+                        border = BorderStroke(2.dp, color = Color.Black)
+
+                    ) {
+                        Text(
+                            text = "Retry",
+                            fontSize = 50.sp,
+                            textAlign = TextAlign.Center,
+                            color = Color.DarkGray,
+
+                        )
+                    }
+                }
+            }
+
+            }
+
         }
     }
-}
+
 
 @Composable
 fun HourlyForecastItem(time:String, icon:String, temp: Int){
@@ -346,10 +393,3 @@ fun DailyForecastItem(day:String, dayIcon: String, nightIcon: String, maxTemp: I
     }
 
 }
-
-
-
-
-
-
-
